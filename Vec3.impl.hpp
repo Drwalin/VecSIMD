@@ -9,10 +9,14 @@ namespace simd
 {
 
 inline ubyte16 ubyte16::load(const void *v) { return {VEC_LOAD_U(v)}; }
+inline ubyte16 ubyte16::load4(const void *v) { return {VEC_LOAD4B_U(v)}; }
 inline byte16 byte16::load(const void *v) { return {VEC_LOAD_I(v)}; }
+inline byte16 byte16::load4(const void *v) { return {VEC_LOAD4B_I(v)}; }
 
 inline uword8 uword8::load(const void *v) { return {VEC_LOAD_U(v)}; }
+inline uword8 uword8::load4(const void *v) { return {VEC_LOAD8B_U(v)}; }
 inline word8 word8::load(const void *v) { return {VEC_LOAD_I(v)}; }
+inline word8 word8::load4(const void *v) { return {VEC_LOAD8B_I(v)}; }
 
 inline uint4 uint4::load(const void *v) { return {VEC_LOAD_U(v)}; }
 inline uint4 uint4::convert_from(ubyte16 src) { return {VEC_BU_TO_U(src.v)}; }

@@ -19,24 +19,28 @@ struct ubyte16 {
 	VECU v;
 
 	inline static ubyte16 load(const void *v);
+	inline static ubyte16 load4(const void *v);
 };
 
 struct byte16 {
 	VECI v;
 
 	inline static byte16 load(const void *v);
+	inline static byte16 load4(const void *v);
 };
 
 struct uword8 {
 	VECU v;
 
 	inline static uword8 load(const void *v);
+	inline static uword8 load4(const void *v);
 };
 
 struct word8 {
 	VECI v;
 
 	inline static word8 load(const void *v);
+	inline static word8 load4(const void *v);
 };
 
 struct uint4 {

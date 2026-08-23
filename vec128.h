@@ -25,16 +25,17 @@ typedef __m128 VECF;
 typedef __m128i VECI;
 typedef __m128i VECU;
 
-#define VEC_F2I(v) _mm_castps_si128(v)
-#define VEC_I2F(v) _mm_castsi128_ps(v)
 #define VEC_F2U(v) _mm_castps_si128(v)
-#define VEC_U2F(v) _mm_castsi128_ps(v)
 #define VEC_I2U(v) (v)
 #define VEC_U2I(v) (v)
 
 #define VEC_LOAD_F(p) _mm_load_ps((const float *)(p))
 #define VEC_LOAD_I(p) _mm_load_si128((const __m128i *)(p))
 #define VEC_LOAD_U(p) _mm_load_si128((const __m128i *)(p))
+#define VEC_LOAD4B_I(p) _mm_loadu_si32(p)
+#define VEC_LOAD4B_U(p) _mm_loadu_si32(p)
+#define VEC_LOAD8B_I(p) _mm_loadu_si64(p)
+#define VEC_LOAD8B_U(p) _mm_loadu_si64(p)
 #define VEC_STORE_F(p, v) _mm_store_ps((float *)(p), (v))
 #define VEC_STORE_I(p, v) _mm_store_si128((__m128i *)(p), (v))
 #define VEC_STORE_U(p, v) _mm_store_si128((__m128i *)(p), (v))
@@ -223,16 +224,17 @@ typedef float32x4_t VECF;
 typedef int32x4_t VECI;
 typedef uint32x4_t VECU;
 
-#define VEC_F2I(v) vreinterpretq_s32_f32(v)
-#define VEC_I2F(v) vreinterpretq_f32_s32(v)
 #define VEC_F2U(v) vreinterpretq_u32_f32(v)
-#define VEC_U2F(v) vreinterpretq_f32_u32(v)
 #define VEC_I2U(v) vreinterpretq_u32_s32(v)
 #define VEC_U2I(v) vreinterpretq_s32_u32(v)
 
 #define VEC_LOAD_F(p) vld1q_f32((const float32_t *)(p))
 #define VEC_LOAD_I(p) vld1q_s32((const int32_t *)(p))
 #define VEC_LOAD_U(p) vld1q_u32((const uint32_t *)(p))
+#define VEC_LOAD4B_I(p) vdupq_n_s32(*(const int32_t *)(p))
+#define VEC_LOAD4B_U(p) vdupq_n_u32(*(const uint32_t *)(p))
+#define VEC_LOAD8B_I(p) vreinterpretq_s32_s64(vdupq_n_s64(*(const int64_t *)(p)))
+#define VEC_LOAD8B_U(p) vreinterpretq_u32_u64(vdupq_n_u64(*(const uint64_t *)(p)))
 #define VEC_STORE_F(p, v) vst1q_f32((float32_t *)(p), (v))
 #define VEC_STORE_I(p, v) vst1q_s32((int32_t *)(p), (v))
 #define VEC_STORE_U(p, v) vst1q_u32((uint32_t *)(p), (v))
