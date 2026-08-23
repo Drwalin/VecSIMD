@@ -43,23 +43,33 @@ struct uint4 {
 	VECU v;
 
 	inline static uint4 load(const void *v);
-	inline static uint4 consrcert(ubyte16);
-	inline static uint4 consrcert(uword8);
+	inline static uint4 convert_from(ubyte16 src);
+	inline static uint4 convert_from(uword8 src);
 	inline static uint4 reinterpret(int4 src);
+
+	inline uint4 operator&(uint4 other) const;
+	inline uint4 operator|(uint4 other) const;
+	inline uint4 operator^(uint4 other) const;
+	inline uint4 operator~() const;
+
+	inline uint4 operator<<(int bits) const;
+	inline uint4 operator>>(int bits) const;
+
+	template <int bits> inline uint4 shl() const;
+	template <int bits> inline uint4 shr() const;
 };
 
 struct int4 {
 	VECI v;
 
 	inline static int4 load(const void *v);
-	inline static int4 consrcert(byte16 v);
-	inline static int4 consrcert(word8 v);
+	inline static int4 convert_from(byte16 src);
+	inline static int4 convert_from(word8 src);
 	inline static int4 reinterpret(uint4 src);
 
 	inline int4 operator+(int4 other) const;
 	inline int4 operator-(int4 other) const;
 	inline int4 operator*(int4 other) const;
-	inline int4 operator/(int4 other) const;
 };
 
 struct float4 {
@@ -68,6 +78,7 @@ struct float4 {
 	inline static float4 load(const float *v);
 	inline static float4 load(float v1, float v2, float v3, float v4);
 	inline static float4 load(float v);
+	inline static float4 convert_from(int4 src);
 
 	inline void store(float *v) const;
 
@@ -120,4 +131,4 @@ struct vec3f {
 };
 } // namespace simd
 
-#include "Vec3.impl.hpp"
+#include "Vec3.impl.hpp" // IWYU pragma: export

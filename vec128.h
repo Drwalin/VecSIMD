@@ -35,26 +35,20 @@ typedef __m128i VECU;
 #define VEC_LOAD_F(p) _mm_load_ps((const float *)(p))
 #define VEC_LOAD_I(p) _mm_load_si128((const __m128i *)(p))
 #define VEC_LOAD_U(p) _mm_load_si128((const __m128i *)(p))
-#define VEC_LOADU_F(p) _mm_loadu_ps((const float *)(p))
-#define VEC_LOADU_I(p) _mm_loadu_si128((const __m128i *)(p))
-#define VEC_LOADU_U(p) _mm_loadu_si128((const __m128i *)(p))
 #define VEC_STORE_F(p, v) _mm_store_ps((float *)(p), (v))
 #define VEC_STORE_I(p, v) _mm_store_si128((__m128i *)(p), (v))
 #define VEC_STORE_U(p, v) _mm_store_si128((__m128i *)(p), (v))
-#define VEC_STOREU_F(p, v) _mm_storeu_ps((float *)(p), (v))
-#define VEC_STOREU_I(p, v) _mm_storeu_si128((__m128i *)(p), (v))
-#define VEC_STOREU_U(p, v) _mm_storeu_si128((__m128i *)(p), (v))
 
 #define VEC_SET1_F(v) _mm_set1_ps(v)
+#define VEC_SET_F(v0, v1, v2, v3) _mm_setr_ps((v0), (v1), (v2), (v3))
 #define VEC_SET1_I(v) _mm_set1_epi32(v)
 #define VEC_SET1_U(v) _mm_set1_epi32((int)(v))
 
 // Widen 4 int8/uint8 values to int32/uint32 lanes.
 #if defined(__SSE4_1__) || defined(_MSC_VER)
-#define VEC_BI_TO_I(p) _mm_cvtepi8_epi32(_mm_loadu_si32((const void *)(p)))
-#define VEC_BU_TO_U(p) _mm_cvtepu8_epi32(_mm_loadu_si32((const void *)(p)))
+#define VEC_BI_TO_I(v) _mm_cvtepi8_epi32(v)
+#define VEC_BU_TO_U(v) _mm_cvtepu8_epi32(v)
 #else
-#define _VEC_LOAD4(p) _mm_castps_si128(_mm_load_ss((const float *)(p)))
 #define _VEC_B2I(v)                                                            \
 	_mm_srai_epi32(                                                            \
 		_mm_unpacklo_epi16(_mm_srai_epi16(_mm_unpacklo_epi8((v), (v)), 8),     \
@@ -65,24 +59,22 @@ typedef __m128i VECU;
 		_mm_unpacklo_epi16(_mm_srli_epi16(_mm_unpacklo_epi8((v), (v)), 8),     \
 						   _mm_srli_epi16(_mm_unpacklo_epi8((v), (v)), 8)),    \
 		16)
-#define VEC_BI_TO_I(p) _VEC_B2I(_VEC_LOAD4(p))
-#define VEC_BU_TO_U(p) _VEC_B2U(_VEC_LOAD4(p))
+#define VEC_BI_TO_I(v) _VEC_B2I(v)
+#define VEC_BU_TO_U(v) _VEC_B2U(v)
 #endif
 
 // Widen 4 int16/uint16 values to int32/uint32 lanes.
 #if defined(__SSE4_1__) || defined(_MSC_VER)
 #define VEC_BI16_TO_I(p)                                                       \
-	_mm_cvtepi16_epi32(_mm_loadl_epi64((const __m128i *)(p)))
-#define VEC_BU16_TO_U(p)                                                       \
-	_mm_cvtepu16_epi32(_mm_loadl_epi64((const __m128i *)(p)))
+	_mm_cvtepi16_epi32(p)
+#define VEC_BU16_TO_U(p) _mm_cvtepu16_epi32(p)
 #else
-#define VEC_BI16_TO_I(p)                                                       \
-	_mm_srai_epi32(_mm_unpacklo_epi16(_mm_loadl_epi64((const __m128i *)(p)),   \
-									  _mm_loadl_epi64((const __m128i *)(p))),  \
-				   16)
-#define VEC_BU16_TO_U(p)                                                       \
-	_mm_unpacklo_epi16(_mm_loadl_epi64((const __m128i *)(p)),                  \
-					   _mm_setzero_si128())
+#define VEC_BI16_TO_I(v)                                                       \
+	_mm_srai_epi32(_mm_unpacklo_epi16((v), (v)),                                \
+								   16)
+#define VEC_BU16_TO_U(v)                                                       \
+	_mm_unpacklo_epi16((v),                                                       \
+									   _mm_setzero_si128())
 #endif
 
 #define VEC_ITOF(v) _mm_cvtepi32_ps(v)
@@ -99,6 +91,22 @@ typedef __m128i VECU;
 #define VEC_SUB_F(a, b) _mm_sub_ps((a), (b))
 #define VEC_MUL_F(a, b) _mm_mul_ps((a), (b))
 #define VEC_DIV_F(a, b) _mm_div_ps((a), (b))
+#define VEC_SQRT_F(a) _mm_sqrt_ps((a))
+#if defined(__SSE4_1__) || defined(_MSC_VER)
+#define VEC_ROUND_NEAREST_F(a) _mm_round_ps((a), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)
+#define VEC_FLOOR_F(a) _mm_round_ps((a), _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)
+#define VEC_CEIL_F(a) _mm_round_ps((a), _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)
+#define VEC_ROUND_ZERO_F(a) _mm_round_ps((a), _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC)
+#else
+#define VEC_ROUND_ZERO_F(a) _mm_cvtepi32_ps(_mm_cvttps_epi32(a))
+#define VEC_ROUND_NEAREST_F(a) _mm_cvtepi32_ps(_mm_cvtps_epi32(a))
+#define VEC_FLOOR_F(a)                                                         \
+	_mm_sub_ps(VEC_ROUND_ZERO_F(a),                                      \
+		_mm_and_ps(_mm_cmpgt_ps(VEC_ROUND_ZERO_F(a), (a)), _mm_set1_ps(1.0f)))
+#define VEC_CEIL_F(a)                                                          \
+	_mm_add_ps(VEC_ROUND_ZERO_F(a),                                      \
+		_mm_and_ps(_mm_cmplt_ps(VEC_ROUND_ZERO_F(a), (a)), _mm_set1_ps(1.0f)))
+#endif
 #define VEC_ADD_I(a, b) _mm_add_epi32((a), (b))
 #define VEC_SUB_I(a, b) _mm_sub_epi32((a), (b))
 #define VEC_ADD_U(a, b) _mm_add_epi32((a), (b))
@@ -188,6 +196,8 @@ typedef __m128i VECU;
 #define VEC_SHR_I(a, n) _mm_srai_epi32((a), (n))
 #define VEC_SHL_U(a, n) _mm_slli_epi32((a), (n))
 #define VEC_SHR_U(a, n) _mm_srli_epi32((a), (n))
+#define VEC_SHL_U_VAR(a, n) _mm_sll_epi32((a), _mm_cvtsi32_si128(n))
+#define VEC_SHR_U_VAR(a, n) _mm_srl_epi32((a), _mm_cvtsi32_si128(n))
 
 #define _VEC_SHUFFLE_F(a, i0, i1, i2, i3)                                      \
 	_mm_shuffle_ps((a), (a),                                                   \
@@ -223,35 +233,33 @@ typedef uint32x4_t VECU;
 #define VEC_LOAD_F(p) vld1q_f32((const float32_t *)(p))
 #define VEC_LOAD_I(p) vld1q_s32((const int32_t *)(p))
 #define VEC_LOAD_U(p) vld1q_u32((const uint32_t *)(p))
-#define VEC_LOADU_F(p) vld1q_f32((const float32_t *)(p))
-#define VEC_LOADU_I(p) vld1q_s32((const int32_t *)(p))
-#define VEC_LOADU_U(p) vld1q_u32((const uint32_t *)(p))
 #define VEC_STORE_F(p, v) vst1q_f32((float32_t *)(p), (v))
 #define VEC_STORE_I(p, v) vst1q_s32((int32_t *)(p), (v))
 #define VEC_STORE_U(p, v) vst1q_u32((uint32_t *)(p), (v))
-#define VEC_STOREU_F(p, v) vst1q_f32((float32_t *)(p), (v))
-#define VEC_STOREU_I(p, v) vst1q_s32((int32_t *)(p), (v))
-#define VEC_STOREU_U(p, v) vst1q_u32((uint32_t *)(p), (v))
 
 #define VEC_SET1_F(v) vdupq_n_f32(v)
+#define VEC_SET_F(v0, v1, v2, v3)                                             \
+	vsetq_lane_f32((v3), vsetq_lane_f32((v2), vsetq_lane_f32((v1),              \
+		vsetq_lane_f32((v0), vdupq_n_f32(0.0f), 0), 1), 2), 3)
 #define VEC_SET1_I(v) vdupq_n_s32(v)
 #define VEC_SET1_U(v) vdupq_n_u32(v)
 
-#define _VEC_LOAD4_S8(p)                                                       \
-	vreinterpret_s8_u32(vld1_lane_u32((const uint32_t *)(p), vdup_n_u32(0), 0))
-#define _VEC_LOAD4_U8(p)                                                       \
-	vreinterpret_u8_u32(vld1_lane_u32((const uint32_t *)(p), vdup_n_u32(0), 0))
-#define VEC_BI_TO_I(p) vmovl_s16(vget_low_s16(vmovl_s8(_VEC_LOAD4_S8(p))))
-#define VEC_BU_TO_U(p) vmovl_u16(vget_low_u16(vmovl_u8(_VEC_LOAD4_U8(p))))
+#define VEC_BI_TO_I(v)                                                         \
+	vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(vreinterpretq_s8_s32(v)))))
+#define VEC_BU_TO_U(v)                                                         \
+	vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(vreinterpretq_u8_u32(v)))))
 
 // Widen 4 int16/uint16 values to int32/uint32 lanes.
-#define VEC_BI16_TO_I(p) vmovl_s16(vld1_s16((const int16_t *)(p)))
-#define VEC_BU16_TO_U(p) vmovl_u16(vld1_u16((const uint16_t *)(p)))
+#define VEC_BI16_TO_I(v)                                                       \
+	vmovl_s16(vget_low_s16(vreinterpretq_s16_s32(v)))
+#define VEC_BU16_TO_U(v)                                                       \
+	vmovl_u16(vget_low_u16(vreinterpretq_u16_u32(v)))
 
 #define VEC_ITOF(v) vcvtq_f32_s32(v)
 #if defined(__aarch64__)
 #define VEC_UTOF(v) vcvtq_f32_u32(v)
 #else
+#warning no fast uint to float neon
 #define _VEC_U2F_H(v) vcvtq_f32_s32(vreinterpretq_s32_u32(vshrq_n_u32((v), 1)))
 #define VEC_UTOF(v)                                                            \
 	vaddq_f32(                                                                 \
@@ -268,6 +276,28 @@ typedef uint32x4_t VECU;
 #define _VEC_RCP1(v) vmulq_f32(vrecpeq_f32(v), vrecpsq_f32(v, vrecpeq_f32(v)))
 #define _VEC_RCP(v) vmulq_f32(_VEC_RCP1(v), vrecpsq_f32(v, _VEC_RCP1(v)))
 #define VEC_DIV_F(a, b) vmulq_f32((a), _VEC_RCP(b))
+#endif
+#if defined(__aarch64__)
+#define VEC_SQRT_F(a) vsqrtq_f32(a)
+#define VEC_ROUND_NEAREST_F(a) vrndnq_f32(a)
+#define VEC_FLOOR_F(a) vrndmq_f32(a)
+#define VEC_CEIL_F(a) vrndpq_f32(a)
+#define VEC_ROUND_ZERO_F(a) vrndq_f32(a)
+#else
+#define VEC_SQRT_F(a)                                                          \
+	vmulq_f32((a), vrsqrteq_f32((a)))
+#define VEC_ROUND_ZERO_F(a)                                                    \
+	vcvtq_f32_s32(vcvtq_s32_f32(a))
+#define VEC_ROUND_NEAREST_F(a)                                                  \
+	vcvtq_f32_s32(vcvtq_s32_f32(vaddq_f32((a), vdupq_n_f32(0.5f))))
+#define VEC_FLOOR_F(a)                                                         \
+	vsubq_f32(VEC_ROUND_ZERO_F(a),                                               \
+		vreinterpretq_f32_u32(vandq_u32(                                         \
+			vcgtq_f32(VEC_ROUND_ZERO_F(a), (a)), vdupq_n_u32(0x3F800000))))
+#define VEC_CEIL_F(a)                                                          \
+	vaddq_f32(VEC_ROUND_ZERO_F(a),                                               \
+		vreinterpretq_f32_u32(vandq_u32(                                         \
+			vcltq_f32(VEC_ROUND_ZERO_F(a), (a)), vdupq_n_u32(0x3F800000))))
 #endif
 #define VEC_ADD_I(a, b) vaddq_s32((a), (b))
 #define VEC_SUB_I(a, b) vsubq_s32((a), (b))
@@ -338,6 +368,8 @@ typedef uint32x4_t VECU;
 #define VEC_SHR_I(a, n) vshrq_n_s32((a), (n))
 #define VEC_SHL_U(a, n) vshlq_n_u32((a), (n))
 #define VEC_SHR_U(a, n) vshrq_n_u32((a), (n))
+#define VEC_SHL_U_VAR(a, n) vshlq_u32((a), vdupq_n_s32(n))
+#define VEC_SHR_U_VAR(a, n) vshlq_u32((a), vdupq_n_s32(-(n)))
 
 #define _VEC_IDX64(oa, ob)                                                     \
 	(((uint64_t)(uint8_t)(4 * ((oa) & 3))) |                                   \
