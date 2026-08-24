@@ -45,14 +45,6 @@ public:
 	uint4 ContainsAll(const aabb4 &r, float eps) const;
 	uint4 ContainsAll(const aabb4 &r, float4) const;
 
-	uint4 FastRayTestCenter(const simd::vec3f &ro, const simd::vec3f &rd,
-							const simd::vec3f &invDir,
-							const int4 raySign[3], const uint4 parallel[3],
-							float4 length,
-							float4 &near, float4 &far) const;
-	uint4 SlowRayTestCenter(const simd::vec3f &start, const simd::vec3f &end,
-							float4 &near, float4 &far) const;
-
 	uint4 FastRayTest2(const simd::vec3f &ro, const simd::vec3f &invDir,
 					   const int4 raySign[3], const uint4 parallel[3],
 					   float4 &near, float4 &far) const;
