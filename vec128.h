@@ -189,6 +189,16 @@ typedef __m128i VECU;
 #define VEC_SHL_U_VAR(a, n) _mm_sll_epi32((a), _mm_cvtsi32_si128(n))
 #define VEC_SHR_U_VAR(a, n) _mm_srl_epi32((a), _mm_cvtsi32_si128(n))
 
+#if defined(__SSE4_1__) || defined(_MSC_VER)
+#define VEC_SELECT_F(mask, falseValue, trueValue)                              \
+	_mm_blendv_ps((falseValue), (trueValue), _mm_castsi128_ps(mask))
+#else
+#define VEC_SELECT_F(mask, falseValue, trueValue)                              \
+	_mm_or_ps(                                                                   \
+		_mm_and_ps(_mm_castsi128_ps(mask), (trueValue)),                           \
+		_mm_andnot_ps(_mm_castsi128_ps(mask), (falseValue)))
+#endif
+
 #elif defined(__aarch64__) || defined(_M_ARM64) || defined(__ARM_NEON) ||      \
 	defined(__ARM_NEON__)
 
@@ -311,6 +321,9 @@ typedef uint32x4_t VECU;
 #define VEC_SHR_U(a, n) vshrq_n_u32((a), (n))
 #define VEC_SHL_U_VAR(a, n) vshlq_u32((a), vdupq_n_s32(n))
 #define VEC_SHR_U_VAR(a, n) vshlq_u32((a), vdupq_n_s32(-(n)))
+
+#define VEC_SELECT_F(mask, falseValue, trueValue)                              \
+	vbslq_f32((mask), (trueValue), (falseValue))
 
 #else
 #error vec128.h requires SSE2 (x86) or NEON (ARM)

@@ -123,6 +123,10 @@ inline float4 float4::round_to_zero() const { return {VEC_ROUND_ZERO_F(v)}; }
 
 inline float4 min(float4 l, float4 r) { return {VEC_MIN_F(l.v, r.v)}; }
 inline float4 max(float4 l, float4 r) { return {VEC_MAX_F(l.v, r.v)}; }
+inline float4 select(uint4 mask, float4 falseValue, float4 trueValue)
+{
+	return {VEC_SELECT_F(mask.v, falseValue.v, trueValue.v)};
+}
 
 #define VEC_FLOAT4_CMP(method, macro)                                          \
 	inline uint4 float4::method(float4 r) const                                \

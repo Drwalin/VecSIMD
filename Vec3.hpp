@@ -140,6 +140,7 @@ inline int4 min(int4 l, int4 r);
 inline int4 max(int4 l, int4 r);
 inline float4 min(float4 l, float4 r);
 inline float4 max(float4 l, float4 r);
+inline float4 select(uint4 mask, float4 falseValue, float4 trueValue);
 inline vec3f min(vec3f l, vec3f r);
 inline vec3f max(vec3f l, vec3f r);
 } // namespace simd
