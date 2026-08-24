@@ -81,6 +81,8 @@ typedef __m128i VECU;
 #define VEC_MUL_F(a, b) _mm_mul_ps((a), (b))
 #define VEC_DIV_F(a, b) _mm_div_ps((a), (b))
 #define VEC_SQRT_F(a) _mm_sqrt_ps((a))
+#define VEC_MIN_F(a, b) _mm_min_ps((a), (b))
+#define VEC_MAX_F(a, b) _mm_max_ps((a), (b))
 #if defined(__SSE4_1__) || defined(_MSC_VER)
 #define VEC_ROUND_NEAREST_F(a) _mm_round_ps((a), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)
 #define VEC_FLOOR_F(a) _mm_round_ps((a), _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)
@@ -103,6 +105,10 @@ typedef __m128i VECU;
 #if defined(__SSE4_1__) || defined(_MSC_VER)
 #define VEC_MUL_I(a, b) _mm_mullo_epi32((a), (b))
 #define VEC_MUL_U(a, b) _mm_mullo_epi32((a), (b))
+#define VEC_MIN_I(a, b) _mm_min_epi32((a), (b))
+#define VEC_MAX_I(a, b) _mm_max_epi32((a), (b))
+#define VEC_MIN_U(a, b) _mm_min_epu32((a), (b))
+#define VEC_MAX_U(a, b) _mm_max_epu32((a), (b))
 #else
 #define _VEC_MUL32(a, b)                                                       \
 	_mm_castps_si128(_mm_shuffle_ps(                                           \
@@ -116,6 +122,39 @@ typedef __m128i VECU;
 											 _mm_shuffle_epi32((b), 0xF5)))),  \
 		_MM_SHUFFLE(2, 0, 2, 0)))
 #define VEC_MUL_I(a, b) _VEC_MUL32((a), (b))
+#define _VEC_SIGNBIT _mm_set1_epi32((int)0x80000000u)
+#define _VEC_MIN_I(a, b)                                                       \
+	_mm_or_si128(                                                               \
+		_mm_and_si128(_mm_cmpgt_epi32((b), (a)), (a)),                            \
+		_mm_andnot_si128(_mm_cmpgt_epi32((b), (a)), (b)))
+#define _VEC_MAX_I(a, b)                                                       \
+	_mm_or_si128(                                                               \
+		_mm_and_si128(_mm_cmpgt_epi32((a), (b)), (a)),                            \
+		_mm_andnot_si128(_mm_cmpgt_epi32((a), (b)), (b)))
+#define _VEC_MIN_U(a, b)                                                       \
+	_mm_or_si128(                                                               \
+		_mm_and_si128(                                                            \
+			_mm_cmpgt_epi32(_mm_xor_si128((b), _VEC_SIGNBIT),                     \
+				_mm_xor_si128((a), _VEC_SIGNBIT)),                                   \
+			(a)),                                                                    \
+		_mm_andnot_si128(                                                         \
+			_mm_cmpgt_epi32(_mm_xor_si128((b), _VEC_SIGNBIT),                     \
+				_mm_xor_si128((a), _VEC_SIGNBIT)),                                   \
+			(b)))
+#define _VEC_MAX_U(a, b)                                                       \
+	_mm_or_si128(                                                               \
+		_mm_and_si128(                                                            \
+			_mm_cmpgt_epi32(_mm_xor_si128((a), _VEC_SIGNBIT),                     \
+				_mm_xor_si128((b), _VEC_SIGNBIT)),                                   \
+			(a)),                                                                    \
+		_mm_andnot_si128(                                                         \
+			_mm_cmpgt_epi32(_mm_xor_si128((a), _VEC_SIGNBIT),                     \
+				_mm_xor_si128((b), _VEC_SIGNBIT)),                                   \
+			(b)))
+#define VEC_MIN_I(a, b) _VEC_MIN_I((a), (b))
+#define VEC_MAX_I(a, b) _VEC_MAX_I((a), (b))
+#define VEC_MIN_U(a, b) _VEC_MIN_U((a), (b))
+#define VEC_MAX_U(a, b) _VEC_MAX_U((a), (b))
 #endif
 
 #define _VEC_ONEI _mm_set1_epi32(-1)
@@ -232,6 +271,12 @@ typedef uint32x4_t VECU;
 #define VEC_ADD_U(a, b) vaddq_u32((a), (b))
 #define VEC_SUB_U(a, b) vsubq_u32((a), (b))
 #define VEC_MUL_U(a, b) vmulq_u32((a), (b))
+#define VEC_MIN_F(a, b) vminq_f32((a), (b))
+#define VEC_MAX_F(a, b) vmaxq_f32((a), (b))
+#define VEC_MIN_I(a, b) vminq_s32((a), (b))
+#define VEC_MAX_I(a, b) vmaxq_s32((a), (b))
+#define VEC_MIN_U(a, b) vminq_u32((a), (b))
+#define VEC_MAX_U(a, b) vmaxq_u32((a), (b))
 
 #define VEC_CMP_EQ_F(a, b) vreinterpretq_f32_u32(vceqq_f32((a), (b)))
 #define VEC_CMP_NE_F(a, b) vreinterpretq_f32_u32(vmvnq_u32(vceqq_f32((a), (b))))

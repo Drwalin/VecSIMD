@@ -76,6 +76,11 @@ inline int4 int4::operator*(int4 other) const
 	return {VEC_MUL_I(v, other.v)};
 }
 
+inline uint4 min(uint4 l, uint4 r) { return {VEC_MIN_U(l.v, r.v)}; }
+inline uint4 max(uint4 l, uint4 r) { return {VEC_MAX_U(l.v, r.v)}; }
+inline int4 min(int4 l, int4 r) { return {VEC_MIN_I(l.v, r.v)}; }
+inline int4 max(int4 l, int4 r) { return {VEC_MAX_I(l.v, r.v)}; }
+
 inline float4 float4::load(const float *v) { return {VEC_LOAD_F(v)}; }
 inline float4 float4::load(float v1, float v2, float v3, float v4)
 {
@@ -115,6 +120,9 @@ inline float4 float4::round_to_nearest() const
 inline float4 float4::floor() const { return {VEC_FLOOR_F(v)}; }
 inline float4 float4::ceil() const { return {VEC_CEIL_F(v)}; }
 inline float4 float4::round_to_zero() const { return {VEC_ROUND_ZERO_F(v)}; }
+
+inline float4 min(float4 l, float4 r) { return {VEC_MIN_F(l.v, r.v)}; }
+inline float4 max(float4 l, float4 r) { return {VEC_MAX_F(l.v, r.v)}; }
 
 #define VEC_FLOAT4_CMP(method, macro)                                          \
 	inline uint4 float4::method(float4 r) const                                \
@@ -182,6 +190,15 @@ inline vec3f vec3f::operator*(float4 other) const
 inline vec3f vec3f::operator/(float4 other) const
 {
 	return {x / other, y / other, z / other};
+}
+
+inline vec3f min(vec3f l, vec3f r)
+{
+	return {min(l.x, r.x), min(l.y, r.y), min(l.z, r.z)};
+}
+inline vec3f max(vec3f l, vec3f r)
+{
+	return {max(l.x, r.x), max(l.y, r.y), max(l.z, r.z)};
 }
 
 inline float4 vec3f::dot(vec3f other) const
