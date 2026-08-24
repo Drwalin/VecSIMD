@@ -22,20 +22,28 @@ public:
 	float4 GetSurface() const;
 
 	simd::vec3f GetCenter() const;
+	// returns max-min
 	simd::vec3f GetSizes() const;
 	simd::vec3f GetMin() const;
 	simd::vec3f GetMax() const;
 
 	aabb4 Expanded(float by) const;
 
-	uint4 HasIntersection(const aabb4 &r, float eps = 0.0f) const;
+	uint4 HasIntersection(const aabb4 &r) const;
+	uint4 HasIntersection(const aabb4 &r, float eps) const;
+	uint4 HasIntersection(const aabb4 &r, float4 eps) const;
 
-	uint4 IsIn(const simd::vec3f &r, float eps = 0.0f) const;
+	uint4 IsIn(const simd::vec3f &r) const;
+	uint4 IsIn(const simd::vec3f &r, float eps) const;
+	uint4 IsIn(const simd::vec3f &r, float4 eps) const;
+
 	aabb4 Intersection(const aabb4 &r) const;
 	aabb4 Sum(const aabb4 &r) const;
 	aabb4 Sum(const simd::vec3f &r) const;
 
-	uint4 ContainsAll(const aabb4 &r, float eps = 0.0f) const;
+	uint4 ContainsAll(const aabb4 &r) const;
+	uint4 ContainsAll(const aabb4 &r, float eps) const;
+	uint4 ContainsAll(const aabb4 &r, float4) const;
 
 	uint4 FastRayTestCenter(const simd::vec3f &ro, const simd::vec3f &rd,
 							const simd::vec3f &invDir, float4 length,
@@ -58,17 +66,18 @@ public:
 	aabb4 GetChildRelativeAabb(aabb4 scaled_child) const;
 
 public:
-	// returns wheather both aabb/vec3 have any common part
+	// returns ::HasIntersection
 	uint4 operator&&(const aabb4 &r) const;
 	uint4 operator&&(const simd::vec3f &r) const;
-	// returns aabb common with passed aabb
+	// returns ::Intersection
 	aabb4 operator*(const aabb4 &r) const;
-	// returns sum (aabb that contains both this and passed in aabb)
+	// returns ::Sum
 	aabb4 operator+(const aabb4 &r) const;
-	// returns sum (aabb that contains both this and passed in vec3)
 	aabb4 operator+(const simd::vec3f &r) const;
 
 	uint4 operator==(const aabb4 &r) const;
 	uint4 operator!=(const aabb4 &r) const;
 };
 } // namespace simd
+
+#include "Aabb.impl.hpp" // IWYU pragma: export
