@@ -20,6 +20,12 @@ struct ubyte16 {
 
 	inline static ubyte16 load(const void *v);
 	inline static ubyte16 load4(const void *v);
+
+	inline void store(void *v) const;
+
+	inline ubyte16 operator+(ubyte16 other) const;
+	inline ubyte16 operator-(ubyte16 other) const;
+	inline ubyte16 operator*(ubyte16 other) const;
 };
 
 struct byte16 {
@@ -27,6 +33,12 @@ struct byte16 {
 
 	inline static byte16 load(const void *v);
 	inline static byte16 load4(const void *v);
+
+	inline void store(void *v) const;
+
+	inline byte16 operator+(byte16 other) const;
+	inline byte16 operator-(byte16 other) const;
+	inline byte16 operator*(byte16 other) const;
 };
 
 struct uword8 {
@@ -34,6 +46,12 @@ struct uword8 {
 
 	inline static uword8 load(const void *v);
 	inline static uword8 load4(const void *v);
+
+	inline void store(void *v) const;
+
+	inline uword8 operator+(uword8 other) const;
+	inline uword8 operator-(uword8 other) const;
+	inline uword8 operator*(uword8 other) const;
 };
 
 struct word8 {
@@ -41,6 +59,12 @@ struct word8 {
 
 	inline static word8 load(const void *v);
 	inline static word8 load4(const void *v);
+
+	inline void store(void *v) const;
+
+	inline word8 operator+(word8 other) const;
+	inline word8 operator-(word8 other) const;
+	inline word8 operator*(word8 other) const;
 };
 
 struct uint4 {
@@ -50,6 +74,12 @@ struct uint4 {
 	inline static uint4 convert_from(ubyte16 src);
 	inline static uint4 convert_from(uword8 src);
 	inline static uint4 reinterpret(int4 src);
+
+	inline void store(void *v) const;
+
+	inline uint4 operator+(uint4 other) const;
+	inline uint4 operator-(uint4 other) const;
+	inline uint4 operator*(uint4 other) const;
 
 	inline uint4 operator&(uint4 other) const;
 	inline uint4 operator|(uint4 other) const;
@@ -70,6 +100,8 @@ struct int4 {
 	inline static int4 convert_from(byte16 src);
 	inline static int4 convert_from(word8 src);
 	inline static int4 reinterpret(uint4 src);
+
+	inline void store(void *v) const;
 
 	inline int4 operator+(int4 other) const;
 	inline int4 operator-(int4 other) const;

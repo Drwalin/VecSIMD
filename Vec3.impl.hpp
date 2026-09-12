@@ -13,15 +13,86 @@ inline ubyte16 ubyte16::load4(const void *v) { return {VEC_LOAD4B_U(v)}; }
 inline byte16 byte16::load(const void *v) { return {VEC_LOAD_I(v)}; }
 inline byte16 byte16::load4(const void *v) { return {VEC_LOAD4B_I(v)}; }
 
+inline void ubyte16::store(void *v) const { VEC_STORE_U(v, this->v); }
+inline void byte16::store(void *v) const { VEC_STORE_I(v, this->v); }
+
+inline ubyte16 ubyte16::operator+(ubyte16 other) const
+{
+	return {VEC_ADD_U8(v, other.v)};
+}
+inline ubyte16 ubyte16::operator-(ubyte16 other) const
+{
+	return {VEC_SUB_U8(v, other.v)};
+}
+inline ubyte16 ubyte16::operator*(ubyte16 other) const
+{
+	return {VEC_MUL_U8(v, other.v)};
+}
+inline byte16 byte16::operator+(byte16 other) const
+{
+	return {VEC_ADD_I8(v, other.v)};
+}
+inline byte16 byte16::operator-(byte16 other) const
+{
+	return {VEC_SUB_I8(v, other.v)};
+}
+inline byte16 byte16::operator*(byte16 other) const
+{
+	return {VEC_MUL_I8(v, other.v)};
+}
+
 inline uword8 uword8::load(const void *v) { return {VEC_LOAD_U(v)}; }
 inline uword8 uword8::load4(const void *v) { return {VEC_LOAD8B_U(v)}; }
 inline word8 word8::load(const void *v) { return {VEC_LOAD_I(v)}; }
 inline word8 word8::load4(const void *v) { return {VEC_LOAD8B_I(v)}; }
 
+inline void uword8::store(void *v) const { VEC_STORE_U(v, this->v); }
+inline void word8::store(void *v) const { VEC_STORE_I(v, this->v); }
+
+inline uword8 uword8::operator+(uword8 other) const
+{
+	return {VEC_ADD_U16(v, other.v)};
+}
+inline uword8 uword8::operator-(uword8 other) const
+{
+	return {VEC_SUB_U16(v, other.v)};
+}
+inline uword8 uword8::operator*(uword8 other) const
+{
+	return {VEC_MUL_U16(v, other.v)};
+}
+inline word8 word8::operator+(word8 other) const
+{
+	return {VEC_ADD_I16(v, other.v)};
+}
+inline word8 word8::operator-(word8 other) const
+{
+	return {VEC_SUB_I16(v, other.v)};
+}
+inline word8 word8::operator*(word8 other) const
+{
+	return {VEC_MUL_I16(v, other.v)};
+}
+
 inline uint4 uint4::load(const void *v) { return {VEC_LOAD_U(v)}; }
 inline uint4 uint4::convert_from(ubyte16 src) { return {VEC_BU_TO_U(src.v)}; }
 inline uint4 uint4::convert_from(uword8 src) { return {VEC_BU16_TO_U(src.v)}; }
 inline uint4 uint4::reinterpret(int4 src) { return {VEC_I2U(src.v)}; }
+
+inline void uint4::store(void *v) const { VEC_STORE_U(v, this->v); }
+
+inline uint4 uint4::operator+(uint4 other) const
+{
+	return {VEC_ADD_U(v, other.v)};
+}
+inline uint4 uint4::operator-(uint4 other) const
+{
+	return {VEC_SUB_U(v, other.v)};
+}
+inline uint4 uint4::operator*(uint4 other) const
+{
+	return {VEC_MUL_U(v, other.v)};
+}
 
 inline uint4 uint4::operator&(uint4 other) const
 {
@@ -62,6 +133,8 @@ inline int4 int4::load(const void *v) { return {VEC_LOAD_I(v)}; }
 inline int4 int4::convert_from(byte16 src) { return {VEC_BI_TO_I(src.v)}; }
 inline int4 int4::convert_from(word8 src) { return {VEC_BI16_TO_I(src.v)}; }
 inline int4 int4::reinterpret(uint4 src) { return {VEC_U2I(src.v)}; }
+
+inline void int4::store(void *v) const { VEC_STORE_I(v, this->v); }
 
 inline int4 int4::operator+(int4 other) const
 {

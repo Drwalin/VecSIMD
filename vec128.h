@@ -37,6 +37,8 @@ typedef __m128i VECU;
 #define VEC_LOAD8B_I(p) _mm_loadu_si64(p)
 #define VEC_LOAD8B_U(p) _mm_loadu_si64(p)
 #define VEC_STORE_F(p, v) _mm_store_ps((float *)(p), (v))
+#define VEC_STORE_I(p, v) _mm_store_si128((__m128i *)(p), (v))
+#define VEC_STORE_U(p, v) _mm_store_si128((__m128i *)(p), (v))
 
 #define VEC_SET1_F(v) _mm_set1_ps(v)
 #define VEC_SET_F(v0, v1, v2, v3) _mm_setr_ps((v0), (v1), (v2), (v3))
@@ -122,6 +124,7 @@ typedef __m128i VECU;
 											 _mm_shuffle_epi32((b), 0xF5)))),  \
 		_MM_SHUFFLE(2, 0, 2, 0)))
 #define VEC_MUL_I(a, b) _VEC_MUL32((a), (b))
+#define VEC_MUL_U(a, b) _VEC_MUL32((a), (b))
 #define _VEC_SIGNBIT _mm_set1_epi32((int)0x80000000u)
 #define _VEC_MIN_I(a, b)                                                       \
 	_mm_or_si128(                                                               \
@@ -156,6 +159,32 @@ typedef __m128i VECU;
 #define VEC_MIN_U(a, b) _VEC_MIN_U((a), (b))
 #define VEC_MAX_U(a, b) _VEC_MAX_U((a), (b))
 #endif
+
+// 8-bit lane arithmetic. Low byte of product is sign-agnostic, so one widening
+// implementation serves both int8 and uint8.
+#define _VEC_MUL8(a, b)                                                        \
+	_mm_packus_epi16(                                                          \
+		_mm_and_si128(                                                         \
+			_mm_mullo_epi16(_mm_unpacklo_epi8((a), _mm_setzero_si128()),      \
+							_mm_unpacklo_epi8((b), _mm_setzero_si128())),      \
+			_mm_set1_epi16(0x00FF)),                                           \
+		_mm_and_si128(                                                         \
+			_mm_mullo_epi16(_mm_unpackhi_epi8((a), _mm_setzero_si128()),      \
+							_mm_unpackhi_epi8((b), _mm_setzero_si128())),      \
+			_mm_set1_epi16(0x00FF)))
+#define VEC_ADD_I8(a, b) _mm_add_epi8((a), (b))
+#define VEC_SUB_I8(a, b) _mm_sub_epi8((a), (b))
+#define VEC_MUL_I8(a, b) _VEC_MUL8((a), (b))
+#define VEC_ADD_U8(a, b) _mm_add_epi8((a), (b))
+#define VEC_SUB_U8(a, b) _mm_sub_epi8((a), (b))
+#define VEC_MUL_U8(a, b) _VEC_MUL8((a), (b))
+// 16-bit lane arithmetic. Low 16 bits of product are sign-agnostic.
+#define VEC_ADD_I16(a, b) _mm_add_epi16((a), (b))
+#define VEC_SUB_I16(a, b) _mm_sub_epi16((a), (b))
+#define VEC_MUL_I16(a, b) _mm_mullo_epi16((a), (b))
+#define VEC_ADD_U16(a, b) _mm_add_epi16((a), (b))
+#define VEC_SUB_U16(a, b) _mm_sub_epi16((a), (b))
+#define VEC_MUL_U16(a, b) _mm_mullo_epi16((a), (b))
 
 #define _VEC_ONEI _mm_set1_epi32(-1)
 
@@ -224,6 +253,8 @@ typedef uint32x4_t VECU;
 #define VEC_LOAD8B_I(p) vreinterpretq_s32_s64(vdupq_n_s64(*(const int64_t *)(p)))
 #define VEC_LOAD8B_U(p) vreinterpretq_u32_u64(vdupq_n_u64(*(const uint64_t *)(p)))
 #define VEC_STORE_F(p, v) vst1q_f32((float32_t *)(p), (v))
+#define VEC_STORE_I(p, v) vst1q_s32((int32_t *)(p), (v))
+#define VEC_STORE_U(p, v) vst1q_u32((uint32_t *)(p), (v))
 
 #define VEC_SET1_F(v) vdupq_n_f32(v)
 #define VEC_SET_F(v0, v1, v2, v3)                                             \
@@ -287,6 +318,19 @@ typedef uint32x4_t VECU;
 #define VEC_MAX_I(a, b) vmaxq_s32((a), (b))
 #define VEC_MIN_U(a, b) vminq_u32((a), (b))
 #define VEC_MAX_U(a, b) vmaxq_u32((a), (b))
+
+#define VEC_ADD_I8(a, b) vaddq_s8((a), (b))
+#define VEC_SUB_I8(a, b) vsubq_s8((a), (b))
+#define VEC_MUL_I8(a, b) vmulq_s8((a), (b))
+#define VEC_ADD_U8(a, b) vaddq_u8((a), (b))
+#define VEC_SUB_U8(a, b) vsubq_u8((a), (b))
+#define VEC_MUL_U8(a, b) vmulq_u8((a), (b))
+#define VEC_ADD_I16(a, b) vaddq_s16((a), (b))
+#define VEC_SUB_I16(a, b) vsubq_s16((a), (b))
+#define VEC_MUL_I16(a, b) vmulq_s16((a), (b))
+#define VEC_ADD_U16(a, b) vaddq_u16((a), (b))
+#define VEC_SUB_U16(a, b) vsubq_u16((a), (b))
+#define VEC_MUL_U16(a, b) vmulq_u16((a), (b))
 
 #define VEC_CMP_EQ_F(a, b) vreinterpretq_f32_u32(vceqq_f32((a), (b)))
 #define VEC_CMP_NE_F(a, b) vreinterpretq_f32_u32(vmvnq_u32(vceqq_f32((a), (b))))
