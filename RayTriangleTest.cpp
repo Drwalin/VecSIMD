@@ -3,6 +3,7 @@
 // Distributed under the MIT License.
 
 #include <cmath>
+#include <cstdint>
 
 #include "Vec3.hpp"
 
@@ -113,7 +114,6 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 					  vec3f d2, vec3f &intersection, vec3f &normal)
 {
 	const float4 zero = float4::load(0.0f);
-	const float4 one = float4::load(1.0f);
 	const vec3f ray = end - start;
 
 	// Select the dominant ray axis independently in every SIMD lane.  The
@@ -215,12 +215,10 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 							 (absF(T - det) <= (tErr + detErr));
 	const uint4 uncertain = edgeUncertain | detUncertain | tUncertain;
 
-	float uncertainLanes[4];
-	select(uncertain, zero, one).store(uncertainLanes);
-	const bool anyUncertain = (uncertainLanes[0] > 0.5f) |
-							  (uncertainLanes[1] > 0.5f) |
-							  (uncertainLanes[2] > 0.5f) |
-							  (uncertainLanes[3] > 0.5f);
+	uint32_t uncertainLanes[4];
+	uncertain.store(uncertainLanes);
+	const bool anyUncertain = (uncertainLanes[0] | uncertainLanes[1] |
+							   uncertainLanes[2] | uncertainLanes[3])u;
 
 	uint4 result = hit;
 	if (anyUncertain) {
@@ -240,11 +238,11 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 		intersection.store(ixa, iya, iza);
 		normal.store(nxa, nya, nza);
 
-		float hitLanes[4];
-		select(hit, zero, one).store(hitLanes);
+		uint32_t hitLanes[4];
+		hit.store(hitLanes);
 
 		for (int i = 0; i < 4; ++i) {
-			if (!(uncertainLanes[i] > 0.5f))
+			if (uncertainLanes[i] == 0u)
 				continue;
 
 			const vec3d s = {sxa[i], sya[i], sza[i]};
@@ -255,7 +253,7 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 
 			vec3d I, N;
 			if (RayTriangleTestDouble(s, e, V0, D1, D2, I, N)) {
-				hitLanes[i] = 1.0f;
+				hitLanes[i] = 0xFFFFFFFFu;
 				ixa[i] = (float)I.x;
 				iya[i] = (float)I.y;
 				iza[i] = (float)I.z;
@@ -263,13 +261,13 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 				nya[i] = (float)N.y;
 				nza[i] = (float)N.z;
 			} else {
-				hitLanes[i] = 0.0f;
+				hitLanes[i] = 0u;
 			}
 		}
 
 		intersection = vec3f::load(ixa, iya, iza);
 		normal = vec3f::load(nxa, nya, nza);
-		result = float4::load(hitLanes) > zero;
+		result = uint4::load(hitLanes);
 	}
 
 	return result;

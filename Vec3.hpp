@@ -26,6 +26,11 @@ struct ubyte16 {
 	inline ubyte16 operator+(ubyte16 other) const;
 	inline ubyte16 operator-(ubyte16 other) const;
 	inline ubyte16 operator*(ubyte16 other) const;
+
+	inline ubyte16 operator&(ubyte16 other) const;
+	inline ubyte16 operator|(ubyte16 other) const;
+	inline ubyte16 operator^(ubyte16 other) const;
+	inline ubyte16 operator~() const;
 };
 
 struct byte16 {
@@ -39,6 +44,11 @@ struct byte16 {
 	inline byte16 operator+(byte16 other) const;
 	inline byte16 operator-(byte16 other) const;
 	inline byte16 operator*(byte16 other) const;
+
+	inline byte16 operator&(byte16 other) const;
+	inline byte16 operator|(byte16 other) const;
+	inline byte16 operator^(byte16 other) const;
+	inline byte16 operator~() const;
 };
 
 struct uword8 {
@@ -52,6 +62,11 @@ struct uword8 {
 	inline uword8 operator+(uword8 other) const;
 	inline uword8 operator-(uword8 other) const;
 	inline uword8 operator*(uword8 other) const;
+
+	inline uword8 operator&(uword8 other) const;
+	inline uword8 operator|(uword8 other) const;
+	inline uword8 operator^(uword8 other) const;
+	inline uword8 operator~() const;
 };
 
 struct word8 {
@@ -65,6 +80,11 @@ struct word8 {
 	inline word8 operator+(word8 other) const;
 	inline word8 operator-(word8 other) const;
 	inline word8 operator*(word8 other) const;
+
+	inline word8 operator&(word8 other) const;
+	inline word8 operator|(word8 other) const;
+	inline word8 operator^(word8 other) const;
+	inline word8 operator~() const;
 };
 
 struct uint4 {
@@ -106,6 +126,11 @@ struct int4 {
 	inline int4 operator+(int4 other) const;
 	inline int4 operator-(int4 other) const;
 	inline int4 operator*(int4 other) const;
+
+	inline int4 operator&(int4 other) const;
+	inline int4 operator|(int4 other) const;
+	inline int4 operator^(int4 other) const;
+	inline int4 operator~() const;
 };
 
 struct float4 {

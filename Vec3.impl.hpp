@@ -28,6 +28,19 @@ inline ubyte16 ubyte16::operator*(ubyte16 other) const
 {
 	return {VEC_MUL_U8(v, other.v)};
 }
+inline ubyte16 ubyte16::operator&(ubyte16 other) const
+{
+	return {VEC_AND_U(v, other.v)};
+}
+inline ubyte16 ubyte16::operator|(ubyte16 other) const
+{
+	return {VEC_OR_U(v, other.v)};
+}
+inline ubyte16 ubyte16::operator^(ubyte16 other) const
+{
+	return {VEC_XOR_U(v, other.v)};
+}
+inline ubyte16 ubyte16::operator~() const { return {VEC_NOT_U(v)}; }
 inline byte16 byte16::operator+(byte16 other) const
 {
 	return {VEC_ADD_I8(v, other.v)};
@@ -40,6 +53,19 @@ inline byte16 byte16::operator*(byte16 other) const
 {
 	return {VEC_MUL_I8(v, other.v)};
 }
+inline byte16 byte16::operator&(byte16 other) const
+{
+	return {VEC_AND_I(v, other.v)};
+}
+inline byte16 byte16::operator|(byte16 other) const
+{
+	return {VEC_OR_I(v, other.v)};
+}
+inline byte16 byte16::operator^(byte16 other) const
+{
+	return {VEC_XOR_I(v, other.v)};
+}
+inline byte16 byte16::operator~() const { return {VEC_NOT_I(v)}; }
 
 inline uword8 uword8::load(const void *v) { return {VEC_LOAD_U(v)}; }
 inline uword8 uword8::load4(const void *v) { return {VEC_LOAD8B_U(v)}; }
@@ -61,6 +87,19 @@ inline uword8 uword8::operator*(uword8 other) const
 {
 	return {VEC_MUL_U16(v, other.v)};
 }
+inline uword8 uword8::operator&(uword8 other) const
+{
+	return {VEC_AND_U(v, other.v)};
+}
+inline uword8 uword8::operator|(uword8 other) const
+{
+	return {VEC_OR_U(v, other.v)};
+}
+inline uword8 uword8::operator^(uword8 other) const
+{
+	return {VEC_XOR_U(v, other.v)};
+}
+inline uword8 uword8::operator~() const { return {VEC_NOT_U(v)}; }
 inline word8 word8::operator+(word8 other) const
 {
 	return {VEC_ADD_I16(v, other.v)};
@@ -73,6 +112,19 @@ inline word8 word8::operator*(word8 other) const
 {
 	return {VEC_MUL_I16(v, other.v)};
 }
+inline word8 word8::operator&(word8 other) const
+{
+	return {VEC_AND_I(v, other.v)};
+}
+inline word8 word8::operator|(word8 other) const
+{
+	return {VEC_OR_I(v, other.v)};
+}
+inline word8 word8::operator^(word8 other) const
+{
+	return {VEC_XOR_I(v, other.v)};
+}
+inline word8 word8::operator~() const { return {VEC_NOT_I(v)}; }
 
 inline uint4 uint4::load(const void *v) { return {VEC_LOAD_U(v)}; }
 inline uint4 uint4::convert_from(ubyte16 src) { return {VEC_BU_TO_U(src.v)}; }
@@ -148,6 +200,19 @@ inline int4 int4::operator*(int4 other) const
 {
 	return {VEC_MUL_I(v, other.v)};
 }
+inline int4 int4::operator&(int4 other) const
+{
+	return {VEC_AND_I(v, other.v)};
+}
+inline int4 int4::operator|(int4 other) const
+{
+	return {VEC_OR_I(v, other.v)};
+}
+inline int4 int4::operator^(int4 other) const
+{
+	return {VEC_XOR_I(v, other.v)};
+}
+inline int4 int4::operator~() const { return {VEC_NOT_I(v)}; }
 
 inline uint4 min(uint4 l, uint4 r) { return {VEC_MIN_U(l.v, r.v)}; }
 inline uint4 max(uint4 l, uint4 r) { return {VEC_MAX_U(l.v, r.v)}; }
