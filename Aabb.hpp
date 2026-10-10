@@ -49,8 +49,8 @@ public:
 					   const int4 raySign[3], const uint4 parallel[3],
 					   float4 &near, float4 &far) const;
 	uint4 FastRayTest2(const simd::vec3f &ro, const simd::vec3f &invDir,
-					   const uint4 parallel[3],
-					   float4 &near, float4 &far) const;
+					   const uint4 parallel[3], float4 &near,
+					   float4 &far) const;
 
 	uint4 SlowRayTest2(const simd::vec3f start, const simd::vec3f end,
 					   float4 &near, float4 &far) const;
@@ -76,5 +76,5 @@ public:
 };
 } // namespace simd
 
-#include "Aabb.impl.hpp" // IWYU pragma: export
+#include "Aabb.impl.hpp"	 // IWYU pragma: export
 #include "Aabb_ray.impl.hpp" // IWYU pragma: export

@@ -10,26 +10,22 @@
 namespace simd
 {
 
-// Scalar double-precision reference vector, used by the double-precision
-// fallback of the ray/triangle test.
+// Scalar double-precision reference vector for the fallback test.
 struct vec3d {
 	double x, y, z;
 };
 
-// Tests one ray segment against one triangle using the watertight
-// ray/triangle intersection algorithm of Woop, Benthin and Wald,
-// "Watertight Ray/Triangle Intersection", JCGT 2(1), 2013, in double
-// precision.
+// Double-precision watertight ray/triangle intersection (Woop, Benthin,
+// Wald, JCGT 2(1), 2013).
 //
-// The triangle is given by v0 and the two edge deltas: d1 is v1 - v2 and d2
-// is v2 - v0, hence the two edges from v0 are d2 and d1 + d2.  The returned
-// value is true on a hit on the [start, end] segment.  On a miss,
-// intersection and normal are still assigned, but their values are
-// unspecified.  The normal is the (unnormalized) geometric normal.
-bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
-						   const vec3d &v0, const vec3d &d1,
-						   const vec3d &d2, vec3d &intersection,
-						   vec3d &normal)
+// Triangle: v0 with edge deltas d1 = v1 - v2 and d2 = v2 - v0, so the edges
+// from v0 are d2 and d1 + d2.  Returns true on a hit on [start, end].  On a
+// miss intersection and normal are still assigned, with unspecified values.
+// The normal is the unnormalized geometric normal.
+static bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
+								  const vec3d &v0, const vec3d &d1,
+								  const vec3d &d2, vec3d &intersection,
+								  vec3d &normal)
 {
 	auto comp = [](const vec3d &v, int axis) -> double {
 		return axis == 0 ? v.x : (axis == 1 ? v.y : v.z);
@@ -37,7 +33,7 @@ bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
 
 	const vec3d ray = {end.x - start.x, end.y - start.y, end.z - start.z};
 
-	// Pick the dominant ray axis and move it to the z position.
+	// Pick the dominant ray axis, move it to z.
 	const double ax = std::fabs(ray.x);
 	const double ay = std::fabs(ray.y);
 	const double az = std::fabs(ray.z);
@@ -45,8 +41,7 @@ bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
 	int kx = (kz + 1) % 3;
 	int ky = (kx + 1) % 3;
 
-	// Swap kx and ky to preserve the winding when the dominant direction
-	// is negative.
+	// Swap kx/ky to preserve winding when the dominant direction is negative.
 	if (comp(ray, kz) < 0.0) {
 		const int tmp = kx;
 		kx = ky;
@@ -64,8 +59,7 @@ bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
 	const vec3d B = {A.x + e1.x, A.y + e1.y, A.z + e1.z};
 	const vec3d C = {A.x + e2.x, A.y + e2.y, A.z + e2.z};
 
-	// Shear and scale the vertices into the space where the ray starts at
-	// the origin and points along +Z.
+	// Shear and scale so the ray starts at the origin, pointing along +Z.
 	const double Ax = comp(A, kx) - Sx * comp(A, kz);
 	const double Ay = comp(A, ky) - Sy * comp(A, kz);
 	const double Bx = comp(B, kx) - Sx * comp(B, kz);
@@ -86,8 +80,8 @@ bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
 
 	const bool positiveDet = det > 0.0;
 	const bool validDet = (det != 0.0) && !mixedSigns;
-	const bool validT = positiveDet ? (T >= 0.0 && T <= det)
-									: (T <= 0.0 && T >= det);
+	const bool validT =
+		positiveDet ? (T >= 0.0 && T <= det) : (T <= 0.0 && T >= det);
 	const bool hit = validDet && validT;
 
 	const double t = T / det;
@@ -98,26 +92,16 @@ bool RayTriangleTestDouble(const vec3d &start, const vec3d &end,
 	return hit;
 }
 
-// Tests four segment rays against four triangles at once.
-//
-// d1 is v1 - v2 and d2 is v2 - v0, hence the two edges from v0 are
-// d2 and d1 + d2.  The returned mask has one all-bits-set lane per hit.
-// On a miss, intersection and normal are still assigned, but their values
-// are unspecified.  The normal is the (unnormalized) geometric normal.
-//
 // Lanes whose single-precision result is numerically ambiguous (degenerate
 // or near-degenerate determinant, or a barycentric coordinate within the
-// rounding error of a triangle edge) are recomputed by RayTriangleTestDouble
-// so that the returned result is at least as precise as that scalar
-// double-precision test.
-uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
-					  vec3f d2, vec3f &intersection, vec3f &normal)
+// rounding error of a triangle edge) are recomputed by RayTriangleTestDouble.
+uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1, vec3f d2,
+					  vec3f &intersection, vec3f &normal)
 {
 	const float4 zero = float4::load(0.0f);
 	const vec3f ray = end - start;
 
-	// Select the dominant ray axis independently in every SIMD lane.  The
-	// axis permutation is the first step of the watertight shear transform.
+	// Select the dominant ray axis per lane (first step of the shear).
 	const float4 ax = max(ray.x, zero - ray.x);
 	const float4 ay = max(ray.y, zero - ray.y);
 	const float4 az = max(ray.z, zero - ray.z);
@@ -128,8 +112,8 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 	float4 ky = select(useX, select(useY, ray.y, ray.x), ray.z);
 	float4 kz = select(useX, select(useY, ray.z, ray.y), ray.x);
 
-	// Keep the projected triangle orientation consistent when the dominant
-	// direction is negative.  This is also done independently per lane.
+	// Keep the projected orientation consistent for negative dominant
+	// direction, per lane.
 	const uint4 reverse = kz < zero;
 	const float4 oldKx = kx;
 	kx = select(reverse, kx, ky);
@@ -145,7 +129,7 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 	const vec3f p1 = p0 + e1;
 	const vec3f p2 = p0 + e2;
 
-	// Project and shear the triangle into the dominant-axis coordinate plane.
+	// Project and shear the triangle into the dominant-axis plane.
 	const float4 p0x = select(useX, select(useY, p0.x, p0.z), p0.y);
 	const float4 p0y = select(useX, select(useY, p0.y, p0.x), p0.z);
 	const float4 p0z = select(useX, select(useY, p0.z, p0.y), p0.x);
@@ -156,13 +140,9 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 	const float4 p2y = select(useX, select(useY, p2.y, p2.x), p2.z);
 	const float4 p2z = select(useX, select(useY, p2.z, p2.y), p2.x);
 
-	// When the dominant direction is negative the kx and ky axes are swapped
-	// to preserve the winding.  The shear constants sx and sy were already
-	// built from the swapped ray direction, so only the projected x and y
-	// coordinates swap here; each coefficient stays with its own axis.
-	// Without this the shear pairs a coefficient with the wrong axis and the
-	// inside test is wrong for every lane whose dominant direction is
-	// negative.
+	// For negative dominant direction kx/ky are swapped to preserve the
+	// winding; sx/sy already came from the swapped direction, so only the
+	// projected x/y swap here.
 	const float4 q0x = select(reverse, p0x + sx * p0z, p0y + sx * p0z);
 	const float4 q0y = select(reverse, p0y + sy * p0z, p0x + sy * p0z);
 	const float4 q1x = select(reverse, p1x + sx * p1z, p1y + sx * p1z);
@@ -170,31 +150,28 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 	const float4 q2x = select(reverse, p2x + sx * p2z, p2y + sx * p2z);
 	const float4 q2y = select(reverse, p2y + sy * p2z, p2x + sy * p2z);
 
-	// Three oriented edge functions.  The mixed-sign rejection is the
-	// watertight inside-triangle test; zero is deliberately accepted.
+	// Oriented edge functions.  Mixed-sign rejection is the watertight
+	// inside test; zero is accepted.
 	const float4 U = q1x * q2y - q1y * q2x;
 	const float4 V = q2x * q0y - q2y * q0x;
 	const float4 W = q0x * q1y - q0y * q1x;
 	const float4 det = U + V + W;
 	const uint4 mixedSigns = ((U < zero) | (V < zero) | (W < zero)) &
-							((U > zero) | (V > zero) | (W > zero));
+							 ((U > zero) | (V > zero) | (W > zero));
 
 	const float4 T = U * (p0z * sz) + V * (p1z * sz) + W * (p2z * sz);
 	const uint4 positiveDet = det > zero;
 	const uint4 validDet = (det != zero) & ~mixedSigns;
 	const uint4 validT = (positiveDet & (T >= zero) & (T <= det)) |
-						((~positiveDet) & (T <= zero) & (T >= det));
+						 ((~positiveDet) & (T <= zero) & (T >= det));
 	const uint4 hit = validDet & validT;
 
 	const float4 t = T / det;
 	intersection = start + ray * t;
 	normal = e1.cross(e2);
 
-	// Flag every lane whose single-precision decision lies within the
-	// accumulated floating point rounding error, i.e. within
-	// kFallbackEps of a sign flip.  Those lanes are recomputed exactly.
-	// kFallbackEps is a few float EPSILONs (float EPSILON is about
-	// 1.19e-7).
+	// Flag lanes whose single-precision decision is within kFallbackEps of a
+	// sign flip; those are recomputed exactly.
 	const float4 kFallbackEps = float4::load(1.0e-6f);
 	auto absF = [&](float4 v) { return max(v, zero - v); };
 
@@ -208,17 +185,17 @@ uint4 RayTriangleTest(vec3f start, vec3f end, vec3f v0, vec3f d1,
 	const float4 T2 = W * (p2z * sz);
 	const float4 tErr = kFallbackEps * (absF(T0) + absF(T1) + absF(T2));
 
-	const uint4 edgeUncertain = (absF(U) <= uErr) | (absF(V) <= vErr) |
-								(absF(W) <= wErr);
+	const uint4 edgeUncertain =
+		(absF(U) <= uErr) | (absF(V) <= vErr) | (absF(W) <= wErr);
 	const uint4 detUncertain = (det == zero) | (absF(det) <= detErr);
-	const uint4 tUncertain = (absF(T) <= tErr) |
-							 (absF(T - det) <= (tErr + detErr));
+	const uint4 tUncertain =
+		(absF(T) <= tErr) | (absF(T - det) <= (tErr + detErr));
 	const uint4 uncertain = edgeUncertain | detUncertain | tUncertain;
 
 	uint32_t uncertainLanes[4];
 	uncertain.store(uncertainLanes);
 	const bool anyUncertain = (uncertainLanes[0] | uncertainLanes[1] |
-							   uncertainLanes[2] | uncertainLanes[3])u;
+							   uncertainLanes[2] | uncertainLanes[3]);
 
 	uint4 result = hit;
 	if (anyUncertain) {

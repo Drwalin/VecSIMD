@@ -7,10 +7,10 @@
 
 namespace simd
 {
-inline uint4 aabb4::FastRayTest2(
-		const simd::vec3f &ro, const simd::vec3f &invDir,
-		const int4 raySign[3], const uint4 parallel[3], float4 &near,
-		float4 &far) const
+inline uint4 aabb4::FastRayTest2(const simd::vec3f &ro,
+								 const simd::vec3f &invDir,
+								 const int4 raySign[3], const uint4 parallel[3],
+								 float4 &near, float4 &far) const
 {
 	const float4 zero = float4::load(0.0f);
 	const float4 one = float4::load(1.0f);
@@ -28,7 +28,7 @@ inline uint4 aabb4::FastRayTest2(
 	const uint4 validX = (ro.x >= min.x) & (ro.x <= max.x);
 	const uint4 validY = (ro.y >= min.y) & (ro.y <= max.y);
 	const uint4 validZ = (ro.z >= min.z) & (ro.z <= max.z);
-	
+
 	const float4 nearX2 = select(parallel[0], nearX, zero);
 	const float4 nearY2 = select(parallel[1], nearY, zero);
 	const float4 nearZ2 = select(parallel[2], nearZ, zero);
@@ -39,32 +39,31 @@ inline uint4 aabb4::FastRayTest2(
 	near = simd::max(zero, simd::max(nearX2, simd::max(nearY2, nearZ2)));
 	far = simd::min(one, simd::min(farX2, simd::min(farY2, farZ2)));
 	return ((~parallel[0]) | validX) & ((~parallel[1]) | validY) &
-		   ((~parallel[2]) | validZ) &
-		   (near <= far);
+		   ((~parallel[2]) | validZ) & (near <= far);
 }
 
 inline uint4 aabb4::FastRayTest2(const simd::vec3f &ro,
-		const simd::vec3f &invDir, const uint4 parallel[3], float4 &near,
-		float4 &far) const
+								 const simd::vec3f &invDir,
+								 const uint4 parallel[3], float4 &near,
+								 float4 &far) const
 {
 	const float4 zero = float4::load(0.0f);
-	const int4 raySign[3] = {
-		int4::reinterpret(invDir.x < zero),
-		int4::reinterpret(invDir.y < zero),
-		int4::reinterpret(invDir.z < zero)};
+	const int4 raySign[3] = {int4::reinterpret(invDir.x < zero),
+							 int4::reinterpret(invDir.y < zero),
+							 int4::reinterpret(invDir.z < zero)};
 	return FastRayTest2(ro, invDir, raySign, parallel, near, far);
 }
 
-inline uint4 aabb4::SlowRayTest2(const simd::vec3f start,
-		const simd::vec3f end, float4 &near, float4 &far) const
+inline uint4 aabb4::SlowRayTest2(const simd::vec3f start, const simd::vec3f end,
+								 float4 &near, float4 &far) const
 {
 	const float4 zero = float4::load(0.0f);
 	const float4 one = float4::load(1.0f);
 	const simd::vec3f direction = end - start;
 	const simd::vec3f invDirection = {one / direction.x, one / direction.y,
-									 one / direction.z};
+									  one / direction.z};
 	const uint4 parallel[3] = {direction.x == zero, direction.y == zero,
-								 direction.z == zero};
+							   direction.z == zero};
 	return FastRayTest2(start, invDirection, parallel, near, far);
 }
-}
+} // namespace simd
