@@ -17,11 +17,14 @@ enable_testing()
 
 add_executable(ray_triangle_test tests/ray_triangle_test.cpp)
 target_link_libraries(ray_triangle_test PRIVATE VecSIMD)
-
-if(MSVC)
-  target_compile_options(ray_triangle_test PRIVATE /W4)
-else()
-  target_compile_options(ray_triangle_test PRIVATE -Wall -Wextra)
-endif()
+target_compile_options(ray_triangle_test PRIVATE -Wall -Wextra)
 
 add_test(NAME ray_triangle_test COMMAND ray_triangle_test)
+
+# Tests for simd::aabb4 (Aabb.hpp). accept [c1]: builds clean with -Wall -Wextra;
+# accept [c2]: runs and exits 0 via ctest.
+add_executable(aabb4_test tests/aabb4_test.cpp)
+target_link_libraries(aabb4_test PRIVATE VecSIMD)
+target_compile_options(aabb4_test PRIVATE -Wall -Wextra)
+
+add_test(NAME aabb4_test COMMAND aabb4_test)

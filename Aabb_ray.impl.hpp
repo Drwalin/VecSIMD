@@ -18,12 +18,12 @@ inline uint4 aabb4::FastRayTest2(const simd::vec3f &ro,
 	const uint4 signY = uint4::reinterpret(raySign[1]);
 	const uint4 signZ = uint4::reinterpret(raySign[2]);
 
-	const float4 nearX = (select(signX, max.x, min.x) - ro.x) * invDir.x;
-	const float4 nearY = (select(signY, max.y, min.y) - ro.y) * invDir.y;
-	const float4 nearZ = (select(signZ, max.z, min.z) - ro.z) * invDir.z;
-	const float4 farX = (select(signX, min.x, max.x) - ro.x) * invDir.x;
-	const float4 farY = (select(signY, min.y, max.y) - ro.y) * invDir.y;
-	const float4 farZ = (select(signZ, min.z, max.z) - ro.z) * invDir.z;
+	const float4 nearX = (select(signX, min.x, max.x) - ro.x) * invDir.x;
+	const float4 nearY = (select(signY, min.y, max.y) - ro.y) * invDir.y;
+	const float4 nearZ = (select(signZ, min.z, max.z) - ro.z) * invDir.z;
+	const float4 farX = (select(signX, max.x, min.x) - ro.x) * invDir.x;
+	const float4 farY = (select(signY, max.y, min.y) - ro.y) * invDir.y;
+	const float4 farZ = (select(signZ, max.z, min.z) - ro.z) * invDir.z;
 
 	const uint4 validX = (ro.x >= min.x) & (ro.x <= max.x);
 	const uint4 validY = (ro.y >= min.y) & (ro.y <= max.y);
