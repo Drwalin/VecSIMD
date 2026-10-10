@@ -6,11 +6,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-add_library(VecSIMD INTERFACE)
-target_include_directories(VecSIMD INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(VecSIMD
+	Vec3.cpp
+	Aabb.cpp
+	Aabb_rays.cpp
+	RayTriangleTest.cpp
+)
+target_include_directories(VecSIMD PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Tests for the watertight ray/triangle intersection (RayTriangleTest.cpp).
 enable_testing()

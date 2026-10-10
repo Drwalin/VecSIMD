@@ -75,6 +75,3 @@ public:
 	uint4 operator!=(const aabb4 &r) const;
 };
 } // namespace simd
-
-#include "Aabb.impl.hpp"	 // IWYU pragma: export
-#include "Aabb_ray.impl.hpp" // IWYU pragma: export
