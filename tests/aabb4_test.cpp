@@ -482,6 +482,30 @@ static void test_ray_boundary_cases()
 	ray({-1, -1, 1}, {0, 0, 1}, true, true, 1.f, 1.f, "end on edge");
 	// 4c. End exactly on the min vertex.
 	ray({-1, -1, -1}, {0, 0, 0}, true, true, 1.f, 1.f, "end on vertex");
+
+	// --- Grazing: ray parallel to a face, lying exactly on that face
+	//     (y = 0). The intersection is the segment x in [0, 2] at y = 0,
+	//     z = 1, so the near/far range depends on where the ends fall.
+
+	// start outside, end outside (segment strictly inside the ends).
+	ray({-1, 0, 1}, {3, 0, 1}, true, true, 0.25f, 0.75f, "on-face out->out");
+	// start outside, end on the face (inside the face region).
+	ray({-2, 0, 1}, {1, 0, 1}, true, true, 2.f / 3.f, 1.f, "on-face out->face");
+	// start on the face, end outside.
+	ray({1, 0, 1}, {4, 0, 1}, true, true, 0.f, 1.f / 3.f, "on-face face->out");
+	// start and end both on the face.
+	ray({0.5f, 0, 1}, {1.5f, 0, 1}, true, true, 0.f, 1.f, "on-face face->face");
+	// along the face edge (y = 0 and z = 0), starting on a vertex.
+	ray({0, 0, 0}, {3, 0, 0}, true, true, 0.f, 2.f / 3.f, "on-edge vertex->out");
+	// along the face edge, ending on a vertex.
+	ray({-1, 0, 0}, {0, 0, 0}, true, true, 1.f, 1.f, "on-edge out->vertex");
+
+	// --- Grazing: single intersection point at the middle of an edge.
+	//     Edge y = 0, z = 0, x = 1 (interior). The ray leaves the box
+	//     immediately, so the only contact is at t = 0.
+	ray({1, 0, 0}, {1, -1, -1}, true, true, 0.f, 0.f, "edge-middle graze t=0");
+	// Same single point reached at the far end of the segment (t = 1).
+	ray({1, -1, -1}, {1, 0, 0}, true, true, 1.f, 1.f, "edge-middle graze t=1");
 }
 
 // Independent double-precision slab reference for the segment ray test.
