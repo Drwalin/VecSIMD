@@ -434,6 +434,56 @@ static void test_slow_ray_basic()
 	CHECK(!laneT(m, 0), "zero-length segment outside the box must miss");
 }
 
+// Boundary-start and boundary-end ray cases on the box [0,2]^3.
+static void test_ray_boundary_cases()
+{
+	aabb4 box = make1({{0, 0, 0}, {2, 2, 2}});
+
+	// wantT = compare near/far against (wn, wf) as well as the hit flag.
+	auto ray = [&](F3 s, F3 e, bool wantHit, bool wantT, float wn, float wf,
+				   const char *what) {
+		float4 n, f;
+		uint4 m = box.SlowRayTest2(rep3(s), rep3(e), n, f);
+		CHECK(laneT(m, 0) == wantHit, "hit mismatch (%s): got %d want %d",
+			  what, (int)laneT(m, 0), (int)wantHit);
+		if (wantHit && wantT)
+			CHECK(feq(lf(n, 0), wn) && feq(lf(f, 0), wf),
+				  "t-range mismatch (%s): got [%g,%g] want [%g,%g]", what,
+				  lf(n, 0), lf(f, 0), wn, wf);
+	};
+
+	// 1. Start strictly inside and exit through the +x face: near = 0,
+	//    far = (2 - 1) / 4 = 0.25, with 0 <= far <= 1.
+	ray({1, 1, 1}, {5, 1, 1}, true, true, 0.f, 0.25f, "start inside, exits");
+
+	// 2. Start strictly outside and point further away: no collision.
+	ray({3, 1, 1}, {4, 1, 1}, false, false, 0, 0, "outside, away on +x");
+	ray({1, 1, 5}, {1, 1, 6}, false, false, 0, 0, "outside, away on +z");
+	ray({1, 1, -3}, {1, 1, -5}, false, false, 0, 0, "outside, away on -z");
+
+	// 3a. Start on the min vertex and head inside: near = 0, far = 1.
+	ray({0, 0, 0}, {1, 1, 1}, true, true, 0.f, 1.f, "vertex start, inward");
+	// 3b. Start on the min vertex and head directly away: the ray only
+	//     touches the corner at t = 0, so it is a degenerate hit (near=far=0).
+	ray({0, 0, 0}, {-1, -1, -1}, true, true, 0.f, 0.f, "vertex start, outward");
+	// 3c. Start on the min-x face and head inside / away. The away ray
+	//     grazes the face plane at t = 0 only -> degenerate hit.
+	ray({0, 1, 1}, {2, 1, 1}, true, true, 0.f, 1.f, "face start, inward");
+	ray({0, 1, 1}, {-2, 1, 1}, true, true, 0.f, 0.f, "face start, outward");
+	// 3d. Start on an edge (x=0, y=0) and head inside.
+	ray({0, 0, 1}, {2, 2, 1}, true, true, 0.f, 1.f, "edge start, inward");
+	// 3e. Start outside and travel alongside the y=0 face (parallel, on the
+	//     boundary): the face plane is inclusive, so this is a hit.
+	ray({-1, 0, 1}, {3, 0, 1}, true, true, 0.25f, 0.75f, "alongside y=0 face");
+
+	// 4a. End exactly on the min-x face: the hit is at t = 1.
+	ray({-1, 1, 1}, {0, 1, 1}, true, true, 1.f, 1.f, "end on face");
+	// 4b. End exactly on an edge (x=0, y=0).
+	ray({-1, -1, 1}, {0, 0, 1}, true, true, 1.f, 1.f, "end on edge");
+	// 4c. End exactly on the min vertex.
+	ray({-1, -1, -1}, {0, 0, 0}, true, true, 1.f, 1.f, "end on vertex");
+}
+
 // Independent double-precision slab reference for the segment ray test.
 // The result is clipped to t in [0, 1], matching SlowRayTest2.
 struct RefSeg {
@@ -649,6 +699,7 @@ int main()
 	test_operators();
 	test_child_relative();
 	test_slow_ray_basic();
+	test_ray_boundary_cases();
 	test_ray_fuzz();
 	test_boolean_fuzz();
 
