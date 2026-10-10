@@ -1,6 +1,8 @@
 // Copyright (c) 2026 Marek Zalewski aka Drwalin
 // Distributed under the MIT License.
 
+#pragma once
+
 #include "Vec3.hpp"
 
 namespace simd
