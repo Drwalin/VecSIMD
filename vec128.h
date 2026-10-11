@@ -17,9 +17,6 @@
 #if defined(__SSE4_1__) || defined(_MSC_VER)
 #include <smmintrin.h>
 #endif
-#if defined(__AVX512F__)
-#include <immintrin.h>
-#endif
 
 typedef __m128 VECF;
 typedef __m128i VECI;
